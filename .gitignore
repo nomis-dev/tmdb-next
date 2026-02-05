@@ -1,0 +1,63 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# dependencies
+/node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.cproject
+/.vscode/*
+!/.vscode/extensions.json
+!/.vscode/launch.json
+!/.vscode/settings.json
+!/.vscode/tasks.json
+*.swp
+*.pws
+*.scratch
+
+# debugging
+npm-debug.log
+yarn-error.log
+
+# Local history
+.history
+
+# compatibility
+.eslintcache
+
+# env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# terraform
+.terraform
+
+# nx
+.nx/cache
+.nx/workspace-data
+
+# playwright
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
+
+# next.js
+/.next/
+/out/
+
+# Next.js
+.next
+out

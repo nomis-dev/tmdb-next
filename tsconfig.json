@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/movie-app-e2e"
+    },
+    {
+      "path": "./apps/movie-app"
+    },
+    {
+      "path": "./libs/lib"
+    }
+  ]
+}
