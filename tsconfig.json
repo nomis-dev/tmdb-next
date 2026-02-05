@@ -11,6 +11,12 @@
     },
     {
       "path": "./libs/lib"
+    },
+    {
+      "path": "./libs/ui"
+    },
+    {
+      "path": "./libs/auth"
     }
   ]
 }
