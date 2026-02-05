@@ -12,9 +12,14 @@ const nextConfig = {
   nx: {},
 };
 
+const createNextIntlPlugin = require('next-intl/plugin');
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+
 const plugins = [
   // Add more Next.js plugins to this list if needed.
   withNx,
+  withNextIntl,
 ];
 
 module.exports = composePlugins(...plugins)(nextConfig);

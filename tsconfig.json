@@ -10,9 +10,6 @@
       "path": "./apps/movie-app"
     },
     {
-      "path": "./libs/lib"
-    },
-    {
       "path": "./libs/ui"
     },
     {
