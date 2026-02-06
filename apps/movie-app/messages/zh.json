@@ -2,5 +2,15 @@
   "HomePage": {
     "title": "欢迎来到 TMDB Next",
     "description": "探索数百万部电影和电视剧。"
+  },
+  "MovieDetail": {
+    "backToMovies": "返回电影列表",
+    "noImage": "暂无图片",
+    "director": "导演",
+    "budget": "预算",
+    "revenue": "票房",
+    "trailer": "预告片",
+    "topCast": "主要演员",
+    "overview": "简介"
   }
 }

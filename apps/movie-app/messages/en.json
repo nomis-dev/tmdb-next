@@ -2,5 +2,15 @@
   "HomePage": {
     "title": "Welcome to TMDB Next",
     "description": "Explore millions of movies and TV shows."
+  },
+  "MovieDetail": {
+    "backToMovies": "Back to Movies",
+    "noImage": "No Image",
+    "director": "Director",
+    "budget": "Budget",
+    "revenue": "Revenue",
+    "trailer": "Trailer",
+    "topCast": "Top Cast",
+    "overview": "Overview"
   }
 }

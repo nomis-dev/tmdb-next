@@ -1,7 +1,10 @@
-import { Link } from '@/i18n/routing';
+'use client';
+
+import { Link, usePathname } from '@/i18n/routing';
 import SearchInput from './SearchInput';
 
 export default function NavBar() {
+  const pathname = usePathname();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
@@ -24,7 +27,7 @@ export default function NavBar() {
           <div className="flex items-center gap-4">
             <div className="flex gap-2 text-sm text-slate-400">
               <Link
-                href="/"
+                href={pathname}
                 locale="en"
                 className="hover:text-white transition-colors"
               >
@@ -32,7 +35,7 @@ export default function NavBar() {
               </Link>
               <span>/</span>
               <Link
-                href="/"
+                href={pathname}
                 locale="zh"
                 className="hover:text-white transition-colors"
               >
@@ -52,7 +55,7 @@ export default function NavBar() {
             </Link>
             <div className="flex gap-2 text-sm text-slate-400">
               <Link
-                href="/"
+                href={pathname}
                 locale="en"
                 className="hover:text-white transition-colors"
               >
@@ -60,7 +63,7 @@ export default function NavBar() {
               </Link>
               <span>/</span>
               <Link
-                href="/"
+                href={pathname}
                 locale="zh"
                 className="hover:text-white transition-colors"
               >

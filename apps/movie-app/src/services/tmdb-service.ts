@@ -8,6 +8,52 @@ export interface Movie {
   release_date: string;
 }
 
+export interface Genre {
+  id: number;
+  name: string;
+}
+
+export interface Cast {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+  order: number;
+}
+
+export interface Crew {
+  id: number;
+  name: string;
+  job: string;
+  department: string;
+  profile_path: string | null;
+}
+
+export interface Video {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+  official: boolean;
+}
+
+export interface MovieDetails extends Movie {
+  genres: Genre[];
+  runtime: number;
+  budget: number;
+  revenue: number;
+  status: string;
+  tagline: string;
+  credits: {
+    cast: Cast[];
+    crew: Crew[];
+  };
+  videos: {
+    results: Video[];
+  };
+}
+
 interface TmdbResponse<T> {
   results: T[];
   page: number;
@@ -32,9 +78,17 @@ const buildUrl = (base: string, endpoint: string, params: Params = {}) => {
 };
 
 const fetchJson = async <T>(url: string, options?: RequestInit): Promise<T> => {
-  const res = await fetch(url, options);
-  if (!res.ok) throw new Error(`API Error: ${res.status} ${res.statusText}`);
-  return res.json();
+  try {
+    const res = await fetch(url, options);
+    if (!res.ok) throw new Error(`API Error: ${res.status} ${res.statusText}`);
+    return res.json();
+  } catch (error) {
+    // Re-throw AbortError to handle request cancellation correctly
+    if (error instanceof Error && error.name === 'AbortError') throw error;
+    
+    console.error(`Fetch failed for ${url}:`, error);
+    throw new Error(`Failed to fetch data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 };
 
 export const TmdbService = {
@@ -74,5 +128,12 @@ export const TmdbService = {
       page,
     }, { signal });
     return data.results;
+  },
+
+  async getMovieDetails(movieId: number, locale = 'en-US'): Promise<MovieDetails> {
+    return this.fetch<MovieDetails>(`movie/${movieId}`, {
+      language: locale,
+      append_to_response: 'credits,videos,images',
+    });
   },
 };

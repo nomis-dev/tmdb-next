@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { Link } from '@/i18n/routing';
-import tmdbLoader from '@/lib/tmdb-loader';
+import MovieImage from '@/components/MovieImage';
 import { Skeleton } from '@tmdb/ui';
 
 interface MovieCardProps {
@@ -28,8 +27,7 @@ export default function MovieCard({
       <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 bg-secondary/20">
         {posterPath ? (
           <>
-            <Image
-              loader={tmdbLoader}
+            <MovieImage
               src={posterPath}
               alt={title}
               fill
