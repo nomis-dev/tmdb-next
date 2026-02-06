@@ -38,21 +38,23 @@ const fetchJson = async <T>(url: string, options?: RequestInit): Promise<T> => {
 };
 
 export const TmdbService = {
-  async fetch<T>(endpoint: string, params: Params = {}): Promise<T> {
+  async fetch<T>(endpoint: string, params: Params = {}, options: RequestInit = {}): Promise<T> {
     if (isServer() && TMDB_CONFIG.accessToken) {
       return fetchJson<T>(
         buildUrl(TMDB_CONFIG.baseUrl, endpoint, params),
         {
+          ...options,
           headers: {
             accept: 'application/json',
             Authorization: `Bearer ${TMDB_CONFIG.accessToken}`,
+            ...options.headers,
           },
-          next: { revalidate: 3600 },
+          next: { revalidate: 3600, ...options.next },
         }
       );
     }
 
-    return fetchJson<T>(buildUrl('/api/movies', endpoint, params));
+    return fetchJson<T>(buildUrl('/api/movies', endpoint, params), options);
   },
 
   async getPopularMovies(locale = 'en-US', page = 1): Promise<Movie[]> {
@@ -60,6 +62,17 @@ export const TmdbService = {
       language: locale,
       page,
     });
+    return data.results;
+  },
+
+  async searchMovies(query: string, locale = 'en-US', page = 1, signal?: AbortSignal): Promise<Movie[]> {
+    if (!query.trim()) return [];
+    
+    const data = await this.fetch<TmdbResponse<Movie>>('search/movie', {
+      query: query.trim(),
+      language: locale,
+      page,
+    }, { signal });
     return data.results;
   },
 };

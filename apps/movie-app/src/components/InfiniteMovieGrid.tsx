@@ -3,6 +3,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Movie, TmdbService } from '@/services/tmdb-service';
 import MovieCard from './MovieCard';
 import { LoadingSpinner } from '@tmdb/ui';
@@ -18,6 +19,10 @@ export default function InfiniteMovieGrid({
 }: InfiniteMovieGridProps) {
   const gridRef = useRef<HTMLDivElement>(null);
   const [columns, setColumns] = useState(2);
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get('q') || '';
+  
+  const initialQueryRef = useRef(searchQuery);
 
   const updateColumnsFromCSS = useCallback(() => {
     if (gridRef.current) {
@@ -41,20 +46,29 @@ export default function InfiniteMovieGrid({
     return () => resizeObserver.disconnect();
   }, [updateColumnsFromCSS]);
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [searchQuery]);
+
+  const shouldUseInitialData = searchQuery === initialQueryRef.current;
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
-      queryKey: ['movies', 'popular', locale],
-      queryFn: async ({ pageParam = 1 }) => {
+      queryKey: ['movies', searchQuery ? 'search' : 'popular', locale, searchQuery],
+      queryFn: async ({ pageParam = 1, signal }) => {
+        if (searchQuery) {
+          return TmdbService.searchMovies(searchQuery, locale, pageParam, signal);
+        }
         return TmdbService.getPopularMovies(locale, pageParam);
       },
       getNextPageParam: (lastPage, allPages) => {
         return lastPage.length > 0 ? allPages.length + 1 : undefined;
       },
       initialPageParam: 1,
-      initialData: {
+      initialData: shouldUseInitialData ? {
         pages: [initialMovies],
         pageParams: [1],
-      },
+      } : undefined,
     });
 
   const allMovies = data ? data.pages.flat() : [];
@@ -93,53 +107,83 @@ export default function InfiniteMovieGrid({
   ]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-12">
-      <div
-        ref={gridRef}
-        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 invisible absolute"
-        aria-hidden="true"
-      >
-        <div />
-      </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20 md:mt-16">
+      {isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <LoadingSpinner />
+        </div>
+      )}
 
-      <div
-        className="relative w-full"
-        style={{ height: `${virtualizer.getTotalSize()}px` }}
-      >
-        {virtualizer.getVirtualItems().map((virtualRow) => {
-          const isLoaderRow = virtualRow.index > virtualRows.length - 1;
-          const moviesInRow = virtualRows[virtualRow.index];
+      {!isLoading && searchQuery && allMovies.length === 0 && (
+        <div className="text-center py-20">
+          <svg
+            className="mx-auto h-16 w-16 text-slate-600 mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <h3 className="text-xl font-semibold text-white mb-2">No results found</h3>
+          <p className="text-slate-400">Try different keywords</p>
+        </div>
+      )}
 
-          return (
-            <div
-              key={virtualRow.index}
-              data-index={virtualRow.index}
-              ref={virtualizer.measureElement}
-              className="absolute top-0 left-0 w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
-              style={{ transform: `translateY(${virtualRow.start}px)` }}
-            >
-              {isLoaderRow ? (
-                isFetchingNextPage && (
-                  <div className="col-span-full">
-                    <LoadingSpinner />
-                  </div>
-                )
-              ) : (
-                moviesInRow?.map((movie, index) => (
-                  <MovieCard
-                    key={movie.id}
-                    id={movie.id}
-                    title={movie.title}
-                    posterPath={movie.poster_path}
-                    rating={Number(movie.vote_average.toFixed(1))}
-                    priority={virtualRow.index === 0}
-                  />
-                ))
-              )}
-            </div>
-          );
-        })}
-      </div>
+      {!isLoading && allMovies.length > 0 && (
+        <>
+          <div
+            ref={gridRef}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 invisible absolute"
+            aria-hidden="true"
+          >
+            <div />
+          </div>
+
+          <div
+            className="relative w-full"
+            style={{ height: `${virtualizer.getTotalSize()}px` }}
+          >
+            {virtualizer.getVirtualItems().map((virtualRow) => {
+              const isLoaderRow = virtualRow.index > virtualRows.length - 1;
+              const moviesInRow = virtualRows[virtualRow.index];
+
+              return (
+                <div
+                  key={virtualRow.index}
+                  data-index={virtualRow.index}
+                  ref={virtualizer.measureElement}
+                  className="absolute top-0 left-0 w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+                  style={{ transform: `translateY(${virtualRow.start}px)` }}
+                >
+                  {isLoaderRow ? (
+                    isFetchingNextPage && (
+                      <div className="col-span-full">
+                        <LoadingSpinner />
+                      </div>
+                    )
+                  ) : (
+                    moviesInRow?.map((movie) => (
+                      <MovieCard
+                        key={movie.id}
+                        id={movie.id}
+                        title={movie.title}
+                        posterPath={movie.poster_path}
+                        rating={Number((movie.vote_average || 0).toFixed(1))}
+                        priority={virtualRow.index === 0}
+                      />
+                    ))
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }
