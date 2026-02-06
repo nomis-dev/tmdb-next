@@ -1,3 +1,6 @@
 // Use this file to export React client components (e.g. those with 'use client' directive) or other non-server utilities
 
-export * from './lib/ui';
+export * from './components/skeleton';
+export * from './lib/utils';
+export * from './components/loading-spinner';
+

@@ -1,37 +1,41 @@
-import {NextIntlClientProvider} from 'next-intl';
-import {getMessages} from 'next-intl/server';
-import {notFound} from 'next/navigation';
-import {routing} from '../../i18n/routing';
-import '../global.css';
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
+import { notFound } from 'next/navigation';
+import { routing } from '@/i18n/routing';
+import '@/app/global.css';
+import ReactQueryProvider from '@/components/ReactQueryProvider';
+import NavBar from '@/components/NavBar';
 
 export const metadata = {
-  title: 'Movie App',
-  description: '',
+  title: 'TMDB Movie App',
+  description: 'TMDB Movie App',
 };
 
 export default async function RootLayout({
   children,
-  params
+  params,
 }: {
   children: React.ReactNode;
-  params: Promise<{locale: string}>;
+  params: Promise<{ locale: string }>;
 }) {
-  const {locale} = await params;
-  
-  // Ensure that the incoming `locale` is valid
+  const { locale } = await params;
+
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }
 
-  // Providing all messages to the client
-  // side is the easiest way to get started
   const messages = await getMessages();
 
   return (
     <html lang={locale}>
       <body>
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <ReactQueryProvider>
+            <div className="bg-background min-h-screen">
+              <NavBar />
+              <main>{children}</main>
+            </div>
+          </ReactQueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>
