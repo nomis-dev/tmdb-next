@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useAuth } from './AuthProvider';
+import { Link } from '@/i18n/routing';
+import { Heart } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -108,6 +110,13 @@ export default function UserMenu() {
               <p className="text-xs leading-none text-slate-400">{user.email}</p>
             </div>
           </DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-white/10" />
+          <DropdownMenuItem asChild>
+            <Link href="/favorites" className="flex items-center gap-2 w-full px-2 py-1.5 cursor-pointer text-sm outline-none transition-colors hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white rounded-sm">
+              <Heart className="w-4 h-4" />
+              <span>My Favorites</span>
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-white/10" />
           <DropdownMenuItem 
             onClick={signOut}
