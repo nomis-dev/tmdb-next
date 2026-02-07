@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { TmdbService } from '@/services/tmdb-service';
 import MovieImage from '@/components/MovieImage';
+import MovieDetailActions from '@/components/MovieDetailActions';
 
 export default async function MovieDetailPage({
   params,
@@ -11,7 +12,7 @@ export default async function MovieDetailPage({
 }) {
   const { locale, id } = await params;
   const t = await getTranslations({ locale, namespace: 'MovieDetail' });
-
+  
   const movieId = parseInt(id, 10);
 
   if (isNaN(movieId)) {
@@ -122,6 +123,13 @@ export default async function MovieDetailPage({
               <span className="text-slate-400">•</span>
               <span className="text-slate-300">{formatRuntime(movie.runtime)}</span>
             </div>
+
+            <MovieDetailActions
+              id={movie.id}
+              title={movie.title}
+              posterPath={movie.poster_path}
+              rating={movie.vote_average}
+            />
 
             <div className="flex flex-wrap gap-2">
               {movie.genres.map((genre) => (

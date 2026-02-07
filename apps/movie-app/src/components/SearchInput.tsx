@@ -4,7 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useParams, usePathname, useRouter } from 'next/navigation';
 import { useDebounce } from '@/hooks/useDebounce';
 
+import { useTranslations } from 'next-intl';
+
 export default function SearchInput() {
+  const t = useTranslations('NavBar');
   const searchParams = useSearchParams();
   const params = useParams();
   const pathname = usePathname();
@@ -74,7 +77,7 @@ export default function SearchInput() {
         name="search"
         id="navbar-search"
         className="block w-full pl-10 pr-10 py-1.5 border border-white/10 rounded-full leading-5 bg-white/5 text-white placeholder-slate-400 focus:outline-none focus:bg-white/10 focus:border-accent transition-all duration-200"
-        placeholder="Search movies..."
+        placeholder={t('searchPlaceholder')}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />

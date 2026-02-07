@@ -11,6 +11,11 @@
     "revenue": "票房",
     "trailer": "预告片",
     "topCast": "主要演员",
-    "overview": "简介"
+    "overview": "简介",
+    "addToFavorites": "加入收藏",
+    "removeFromFavorites": "取消收藏"
+  },
+  "NavBar": {
+    "searchPlaceholder": "搜索电影..."
   }
 }

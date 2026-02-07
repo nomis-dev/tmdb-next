@@ -11,6 +11,11 @@
     "revenue": "Revenue",
     "trailer": "Trailer",
     "topCast": "Top Cast",
-    "overview": "Overview"
+    "overview": "Overview",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites"
+  },
+  "NavBar": {
+    "searchPlaceholder": "Search movies..."
   }
 }
