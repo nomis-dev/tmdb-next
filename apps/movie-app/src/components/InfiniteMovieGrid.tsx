@@ -65,7 +65,19 @@ export default function InfiniteMovieGrid({
   }, [updateColumnsFromCSS]);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    const savedPos = sessionStorage.getItem('tmdb_scroll_pos');
+    if (savedPos) {
+      setTimeout(() => {
+        window.scrollTo({ top: parseInt(savedPos), behavior: 'instant' });
+        sessionStorage.removeItem('tmdb_scroll_pos');
+      }, 100);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!sessionStorage.getItem('tmdb_scroll_pos')) {
+       window.scrollTo({ top: 0, behavior: 'instant' });
+    }
   }, [searchQuery]);
 
   const shouldUseInitialData = searchQuery === initialQueryRef.current;

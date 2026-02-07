@@ -26,7 +26,16 @@ export default function MovieCard({
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <Link href={`/movie/${id}`} className="block group mb-8">
+    <Link 
+      href={`/movie/${id}`} 
+      className="block group mb-8" 
+      prefetch={true}
+      onClick={() => {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('tmdb_scroll_pos', window.scrollY.toString());
+        }
+      }}
+    >
       <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 bg-secondary/20">
         {posterPath ? (
           <>
