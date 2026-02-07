@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Link } from '@/i18n/routing';
 import MovieImage from '@/components/MovieImage';
 import { Skeleton } from '@tmdb/ui';
@@ -15,7 +15,7 @@ interface MovieCardProps {
   isFavorite?: boolean;
 }
 
-export default function MovieCard({
+function MovieCard({
   id,
   title,
   posterPath,
@@ -25,16 +25,22 @@ export default function MovieCard({
 }: MovieCardProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const handleClick = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('tmdb_scroll_pos', window.scrollY.toString());
+    }
+  }, []);
+
+  const handleImageLoad = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
+
   return (
     <Link 
       href={`/movie/${id}`} 
       className="block group mb-8" 
       prefetch={true}
-      onClick={() => {
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('tmdb_scroll_pos', window.scrollY.toString());
-        }
-      }}
+      onClick={handleClick}
     >
       <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 bg-secondary/20">
         {posterPath ? (
@@ -46,7 +52,7 @@ export default function MovieCard({
               className={`group-hover:scale-110`}
               sizes="(max-width: 768px) 33vw, 20vw"
               priority={priority}
-              onLoad={() => setIsLoaded(true)}
+              onLoad={handleImageLoad}
             />
             {!isLoaded && (
               <Skeleton className="absolute inset-0 h-full w-full rounded-xl" />
@@ -93,4 +99,5 @@ export default function MovieCard({
   );
 }
 
+export default memo(MovieCard);
 

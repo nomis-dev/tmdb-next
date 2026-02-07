@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { useAuth } from './AuthProvider';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -17,7 +17,7 @@ interface Favorite {
   movieId: number;
 }
 
-export default function FavoriteButton({
+function FavoriteButton({
   movieId,
   title,
   posterPath,
@@ -80,16 +80,16 @@ export default function FavoriteButton({
     },
   });
 
-  if (!user) {
-    return null;
-  }
-
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setOptimisticFavorite(!optimisticFavorite); // Instant UI update
     toggleFavorite();
-  };
+  }, [optimisticFavorite, toggleFavorite]);
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <button
@@ -118,3 +118,5 @@ export default function FavoriteButton({
     </button>
   );
 }
+
+export default memo(FavoriteButton);

@@ -115,6 +115,9 @@ export const TmdbService = {
     const data = await this.fetch<TmdbResponse<Movie>>('movie/popular', {
       language: locale,
       page,
+    }, {
+      next: { revalidate: 3600 },
+      cache: 'force-cache',
     });
     return data.results;
   },
