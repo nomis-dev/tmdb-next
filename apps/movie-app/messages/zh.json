@@ -17,5 +17,28 @@
   },
   "NavBar": {
     "searchPlaceholder": "搜索电影..."
+  },
+  "UserMenu": {
+    "myFavorites": "我的收藏",
+    "signOut": "退出登录",
+    "signIn": "登录",
+    "createAccount": "创建账户",
+    "magicLink": "魔法链接",
+    "emailAddress": "邮箱地址",
+    "password": "密码",
+    "or": "或",
+    "signInWithMagicLink": "使用魔法链接登录",
+    "dontHaveAccount": "还没有账户？",
+    "signUp": "注册",
+    "alreadyHaveAccount": "已有账户？",
+    "backToLogin": "返回密码登录",
+    "checkEmail": "检查你的邮箱",
+    "sentLinkTo": "我们已发送确认链接至",
+    "sendMagicLink": "发送魔法链接",
+    "willSendLink": "我们将发送一个链接供您立即登录。",
+    "passwordMinLength": "至少6个字符",
+    "yourPassword": "您的密码",
+    "passwordError": "密码必须至少包含6个字符",
+    "loading": "加载中..."
   }
 }

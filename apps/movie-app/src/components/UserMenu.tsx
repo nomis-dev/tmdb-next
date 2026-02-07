@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAuth } from './AuthProvider';
 import { Link } from '@/i18n/routing';
 import { Heart } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,7 @@ type AuthMode = 'login' | 'register' | 'magic-link' | 'check-email';
 
 export default function UserMenu() {
   const { user, loading, signUp, signIn, signInWithMagicLink, signOut } = useAuth();
+  const t = useTranslations('UserMenu');
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
@@ -55,7 +57,7 @@ export default function UserMenu() {
       }
     } else if (mode === 'register') {
       if (password.length < 6) {
-        setError('Password must be at least 6 characters');
+        setError(t('passwordError'));
         setSubmitting(false);
         return;
       }
@@ -106,7 +108,6 @@ export default function UserMenu() {
         <DropdownMenuContent align="end" className="w-56 bg-black/80 backdrop-blur-xl border-white/10 text-white">
           <DropdownMenuLabel>
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{user.user_metadata?.full_name || 'User'}</p>
               <p className="text-xs leading-none text-slate-400">{user.email}</p>
             </div>
           </DropdownMenuLabel>
@@ -114,7 +115,7 @@ export default function UserMenu() {
           <DropdownMenuItem asChild>
             <Link href="/favorites" className="flex items-center gap-2 w-full px-2 py-1.5 cursor-pointer text-sm outline-none transition-colors hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white rounded-sm">
               <Heart className="w-4 h-4" />
-              <span>My Favorites</span>
+              <span>{t('myFavorites')}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-white/10" />
@@ -122,7 +123,7 @@ export default function UserMenu() {
             onClick={signOut}
             className="text-red-400 focus:text-red-400 focus:bg-red-400/10 cursor-pointer"
           >
-            Sign Out
+            {t('signOut')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -135,7 +136,7 @@ export default function UserMenu() {
         onClick={() => setShowLoginModal(true)}
         className="px-4 py-2 bg-accent hover:bg-accent/80 rounded-lg transition-all duration-200 text-sm font-medium text-white cursor-pointer"
       >
-        Sign In
+        {t('signIn')}
       </button>
 
       {showLoginModal && (
@@ -162,31 +163,31 @@ export default function UserMenu() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">Check your email</h3>
+                <h3 className="text-lg font-semibold text-white mb-2">{t('checkEmail')}</h3>
                 <p className="text-slate-400">
-                  We sent a confirmation link to <br />
+                  {t('sentLinkTo')} <br />
                   <span className="text-white">{email}</span>
                 </p>
                 <button
                   onClick={resetForm}
                   className="mt-4 text-accent hover:underline cursor-pointer"
                 >
-                  Back to sign in
+                  {t('backToLogin')}
                 </button>
               </div>
             ) : (
               <>
                 <h2 className="text-2xl font-bold text-white mb-6">
-                  {mode === 'login' && 'Sign In'}
-                  {mode === 'register' && 'Create Account'}
-                  {mode === 'magic-link' && 'Magic Link'}
+                  {mode === 'login' && t('signIn')}
+                  {mode === 'register' && t('createAccount')}
+                  {mode === 'magic-link' && t('magicLink')}
                 </h2>
 
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Email address
+                        {t('emailAddress')}
                       </label>
                       <input
                         type="email"
@@ -201,13 +202,13 @@ export default function UserMenu() {
                     {(mode === 'login' || mode === 'register') && (
                       <div>
                         <label className="block text-sm font-medium text-slate-300 mb-2">
-                          Password
+                          {t('password')}
                         </label>
                         <input
                           type="password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          placeholder={mode === 'register' ? 'At least 6 characters' : 'Your password'}
+                          placeholder={mode === 'register' ? t('passwordMinLength') : t('yourPassword')}
                           className="w-full px-4 py-3 bg-slate-800 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                           required
                         />
@@ -224,10 +225,10 @@ export default function UserMenu() {
                     disabled={submitting}
                     className="w-full mt-6 px-4 py-3 bg-accent hover:bg-accent/80 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all duration-200 text-white font-medium cursor-pointer"
                   >
-                    {submitting ? 'Loading...' : (
-                      mode === 'login' ? 'Sign In' :
-                      mode === 'register' ? 'Create Account' :
-                      'Send Magic Link'
+                    {submitting ? t('loading') : (
+                      mode === 'login' ? t('signIn') :
+                      mode === 'register' ? t('createAccount') :
+                      t('sendMagicLink')
                     )}
                   </button>
                 </form>
@@ -237,22 +238,22 @@ export default function UserMenu() {
                     <>
                       <div className="flex items-center gap-4">
                         <div className="flex-1 h-px bg-white/10" />
-                        <span className="text-slate-500 text-sm">or</span>
+                        <span className="text-slate-500 text-sm">{t('or')}</span>
                         <div className="flex-1 h-px bg-white/10" />
                       </div>
                       <button
                         onClick={() => setMode('magic-link')}
                         className="w-full px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-white/10 rounded-lg transition-all duration-200 text-white cursor-pointer"
                       >
-                        Sign in with Magic Link
+                        {t('signInWithMagicLink')}
                       </button>
                       <p className="text-center text-sm text-slate-400">
-                        Don't have an account?{' '}
+                        {t('dontHaveAccount')}{' '}
                         <button
                           onClick={() => { setMode('register'); setError(''); }}
                           className="text-accent hover:underline cursor-pointer"
                         >
-                          Sign up
+                          {t('signUp')}
                         </button>
                       </p>
                     </>
@@ -260,12 +261,12 @@ export default function UserMenu() {
 
                   {mode === 'register' && (
                     <p className="text-center text-sm text-slate-400">
-                      Already have an account?{' '}
+                      {t('alreadyHaveAccount')}{' '}
                       <button
                         onClick={() => { setMode('login'); setError(''); }}
                         className="text-accent hover:underline cursor-pointer"
                       >
-                        Sign in
+                        {t('signIn')}
                       </button>
                     </p>
                   )}
@@ -273,14 +274,14 @@ export default function UserMenu() {
                   {mode === 'magic-link' && (
                     <>
                       <p className="text-center text-sm text-slate-500">
-                        We'll send you a link to sign in instantly.
+                        {t('willSendLink')}
                       </p>
                       <p className="text-center text-sm text-slate-400">
                         <button
                           onClick={() => { setMode('login'); setError(''); }}
                           className="text-accent hover:underline cursor-pointer"
                         >
-                          Back to password login
+                          {t('backToLogin')}
                         </button>
                       </p>
                     </>

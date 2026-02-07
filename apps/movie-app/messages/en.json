@@ -17,5 +17,28 @@
   },
   "NavBar": {
     "searchPlaceholder": "Search movies..."
+  },
+  "UserMenu": {
+    "myFavorites": "My Favorites",
+    "signOut": "Sign Out",
+    "signIn": "Sign In",
+    "createAccount": "Create Account",
+    "magicLink": "Magic Link",
+    "emailAddress": "Email address",
+    "password": "Password",
+    "or": "or",
+    "signInWithMagicLink": "Sign in with Magic Link",
+    "dontHaveAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "alreadyHaveAccount": "Already have an account?",
+    "backToLogin": "Back to password login",
+    "checkEmail": "Check your email",
+    "sentLinkTo": "We sent a confirmation link to",
+    "sendMagicLink": "Send Magic Link",
+    "willSendLink": "We'll send you a link to sign in instantly.",
+    "passwordMinLength": "At least 6 characters",
+    "yourPassword": "Your password",
+    "passwordError": "Password must be at least 6 characters",
+    "loading": "Loading..."
   }
 }
