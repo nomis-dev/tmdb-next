@@ -21,10 +21,11 @@ export async function GET(
 
     const data = await TmdbService.fetch(apiPath, queryParams);
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching data from TMDB:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch data from TMDB';
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch data from TMDB' },
+      { error: errorMessage },
       { status: 500 },
     );
   }

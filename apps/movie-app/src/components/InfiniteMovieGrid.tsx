@@ -68,7 +68,14 @@ export default function InfiniteMovieGrid({
     const savedPos = sessionStorage.getItem('tmdb_scroll_pos');
     if (savedPos) {
       setTimeout(() => {
-        window.scrollTo({ top: parseInt(savedPos), behavior: 'instant' });
+        const scrollPos = parseInt(savedPos);
+        // Ensure we don't scroll beyond the actual document height
+        const maxScroll = Math.max(
+          0,
+          document.documentElement.scrollHeight - window.innerHeight
+        );
+        const targetScroll = Math.min(scrollPos, maxScroll);
+        window.scrollTo({ top: targetScroll, behavior: 'instant' });
         sessionStorage.removeItem('tmdb_scroll_pos');
       }, 100);
     }
