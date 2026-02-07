@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { Link, usePathname } from '@/i18n/routing';
 import SearchInput from './SearchInput';
+import UserMenu from './UserMenu';
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -46,6 +47,7 @@ export default function NavBar() {
                 中文
               </Link>
             </div>
+            <UserMenu />
           </div>
         </div>
 
@@ -57,22 +59,25 @@ export default function NavBar() {
             >
               TMDB Next
             </Link>
-            <div className="flex gap-2 text-sm text-slate-400">
-              <Link
-                href={href}
-                locale="en"
-                className="hover:text-white transition-colors"
-              >
-                EN
-              </Link>
-              <span>/</span>
-              <Link
-                href={href}
-                locale="zh"
-                className="hover:text-white transition-colors"
-              >
-                中文
-              </Link>
+            <div className="flex gap-4 items-center">
+              <div className="flex gap-2 text-sm text-slate-400">
+                <Link
+                  href={href}
+                  locale="en"
+                  className="hover:text-white transition-colors"
+                >
+                  EN
+                </Link>
+                <span>/</span>
+                <Link
+                  href={href}
+                  locale="zh"
+                  className="hover:text-white transition-colors"
+                >
+                  中文
+                </Link>
+              </div>
+              <UserMenu />
             </div>
           </div>
 

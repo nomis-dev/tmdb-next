@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import '@/app/global.css';
 import ReactQueryProvider from '@/components/ReactQueryProvider';
+import { AuthProvider } from '@/components/AuthProvider';
 import NavBar from '@/components/NavBar';
 
 export const metadata = {
@@ -31,10 +32,12 @@ export default async function RootLayout({
       <body className="overflow-x-hidden">
         <NextIntlClientProvider messages={messages}>
           <ReactQueryProvider>
-            <div className="bg-background min-h-screen">
-              <NavBar />
-              <main>{children}</main>
-            </div>
+            <AuthProvider>
+              <div className="bg-background min-h-screen">
+                <NavBar />
+                <main className="w-full overflow-x-hidden">{children}</main>
+              </div>
+            </AuthProvider>
           </ReactQueryProvider>
         </NextIntlClientProvider>
       </body>

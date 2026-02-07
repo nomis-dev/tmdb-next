@@ -3,4 +3,5 @@
 export * from './components/skeleton';
 export * from './lib/utils';
 export * from './components/loading-spinner';
+export * from './components/dropdown-menu';
 
