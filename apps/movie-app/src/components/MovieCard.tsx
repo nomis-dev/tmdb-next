@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import MovieImage from '@/components/MovieImage';
 import { Skeleton } from '@tmdb/ui';
+import FavoriteButton from './FavoriteButton';
 
 interface MovieCardProps {
   id: number;
@@ -11,6 +12,7 @@ interface MovieCardProps {
   posterPath: string;
   rating: number;
   priority?: boolean;
+  isFavorite?: boolean;
 }
 
 export default function MovieCard({
@@ -19,6 +21,7 @@ export default function MovieCard({
   posterPath,
   rating,
   priority = false,
+  isFavorite = false,
 }: MovieCardProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -61,6 +64,15 @@ export default function MovieCard({
           </svg>
           <span className="text-xs font-bold text-white">{rating}</span>
         </div>
+
+        <FavoriteButton
+          movieId={id}
+          title={title}
+          posterPath={posterPath}
+          rating={rating}
+          isFavorite={isFavorite}
+          className="absolute top-2 left-2 z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 scale-90 hover:scale-100"
+        />
       </div>
 
       <div className="space-y-1">

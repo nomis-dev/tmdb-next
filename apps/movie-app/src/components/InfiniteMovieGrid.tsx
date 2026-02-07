@@ -1,16 +1,21 @@
 'use client';
 
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Movie, TmdbService } from '@/services/tmdb-service';
 import MovieCard from './MovieCard';
 import { LoadingSpinner } from '@tmdb/ui';
+import { useAuth } from './AuthProvider';
 
 interface InfiniteMovieGridProps {
   initialMovies: Movie[];
   locale: string;
+}
+
+interface Favorite {
+  movieId: number;
 }
 
 export default function InfiniteMovieGrid({
@@ -21,8 +26,21 @@ export default function InfiniteMovieGrid({
   const [columns, setColumns] = useState(2);
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
+  const { user } = useAuth();
   
   const initialQueryRef = useRef(searchQuery);
+
+  const { data: favorites = [] } = useQuery<Favorite[]>({
+    queryKey: ['favorites', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const res = await fetch('/api/favorites');
+      if (!res.ok) throw new Error('Failed to fetch favorites');
+      return res.json();
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5, 
+  });
 
   const updateColumnsFromCSS = useCallback(() => {
     if (gridRef.current) {
@@ -175,6 +193,7 @@ export default function InfiniteMovieGrid({
                         posterPath={movie.poster_path}
                         rating={Number((movie.vote_average || 0).toFixed(1))}
                         priority={virtualRow.index === 0}
+                        isFavorite={favorites.some((f) => f.movieId === movie.id)}
                       />
                     ))
                   )}
