@@ -28,7 +28,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
-      <body>
+      <body className="overflow-x-hidden">
         <NextIntlClientProvider messages={messages}>
           <ReactQueryProvider>
             <div className="bg-background min-h-screen">

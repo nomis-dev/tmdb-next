@@ -43,7 +43,7 @@ export default function MovieImage({
         alt={alt}
         fill={fill}
         priority={priority}
-        className={`${className} transition-opacity duration-300 ${
+        className={`${className} transition-all duration-300 ${
           isLoaded ? 'opacity-100' : 'opacity-0'
         }`}
         sizes={sizes}

@@ -31,9 +31,7 @@ export default function MovieCard({
               src={posterPath}
               alt={title}
               fill
-              className={`object-cover transition-all duration-500 group-hover:scale-110 ${
-                isLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
+              className={`group-hover:scale-110`}
               sizes="(max-width: 768px) 33vw, 20vw"
               priority={priority}
               onLoad={() => setIsLoaded(true)}
