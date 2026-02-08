@@ -13,32 +13,35 @@ export default function SearchInput() {
   const pathname = usePathname();
   const router = useRouter();
   const locale = params.locale;
-  
+
   const initialQuery = searchParams.get('q') || '';
   const [query, setQuery] = useState(initialQuery);
-  const debouncedQuery = useDebounce(query, 400);
+  const debouncedQuery = useDebounce(query, 300);
 
   const lastExecutedQuery = useRef<string | null>(null);
 
   useEffect(() => {
-    const isHomePage = pathname === `/${locale}` || pathname === '/';
-    
+    const isMoviesPage = pathname?.endsWith('/movies');
+
     if (debouncedQuery === lastExecutedQuery.current) {
       return;
     }
 
     if (debouncedQuery) {
-      const newUrl = `/${locale}?q=${encodeURIComponent(debouncedQuery)}`;
+      const newUrl = `/${locale}/movies?q=${encodeURIComponent(debouncedQuery)}`;
       
-      if (isHomePage) {
+      if (isMoviesPage) {
         window.history.replaceState(null, '', newUrl);
         lastExecutedQuery.current = debouncedQuery;
       } else {
         lastExecutedQuery.current = debouncedQuery;
         router.push(newUrl);
       }
-    } else if (isHomePage && lastExecutedQuery.current !== '') {
-      window.history.replaceState(null, '', `/${locale}`);
+    } else if (lastExecutedQuery.current) {
+      if (isMoviesPage) {
+        window.history.replaceState(null, '', `/${locale}/movies`);
+      }
+      
       lastExecutedQuery.current = '';
     }
   }, [debouncedQuery, locale, pathname, router]);
@@ -46,7 +49,7 @@ export default function SearchInput() {
   useEffect(() => {
     const currentParam = searchParams.get('q') || '';
     if (currentParam && lastExecutedQuery.current === null) {
-        lastExecutedQuery.current = currentParam;
+      lastExecutedQuery.current = currentParam;
     }
   }, [searchParams]);
 
@@ -56,11 +59,10 @@ export default function SearchInput() {
     <div className="relative group w-full">
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <svg
-          className={`h-4 w-4 transition-colors ${
-            isPending
+          className={`h-4 w-4 transition-colors ${isPending
               ? 'text-accent animate-pulse'
               : 'text-slate-400 group-focus-within:text-accent'
-          }`}
+            }`}
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
