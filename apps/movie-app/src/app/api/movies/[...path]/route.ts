@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { TmdbService } from '@/services/tmdb-service';
+import { TmdbService, TmdbResponseSchema, MovieDetailsSchema } from '@/services/tmdb-service';
+import { z } from 'zod';
+
+// Schema mapping based on API path patterns
+const getSchemaForPath = (path: string): z.ZodTypeAny => {
+  // Movie details endpoint: movie/{id}
+  if (/^movie\/\d+$/.test(path)) {
+    return MovieDetailsSchema;
+  }
+  // List endpoints: movie/popular, search/movie, etc.
+  return TmdbResponseSchema;
+};
 
 export async function GET(
   request: NextRequest,
@@ -19,7 +30,8 @@ export async function GET(
       queryParams['language'] = 'en-US';
     }
 
-    const data = await TmdbService.fetch(apiPath, queryParams);
+    const schema = getSchemaForPath(apiPath);
+    const data = await TmdbService.fetch(schema, apiPath, queryParams);
     return NextResponse.json(data);
   } catch (error: unknown) {
     console.error('Error fetching data from TMDB:', error);

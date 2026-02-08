@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const MovieSchema = z.object({
+export const MovieSchema = z.object({
   id: z.number(),
   title: z.string(),
   overview: z.string(),
@@ -10,12 +10,12 @@ const MovieSchema = z.object({
   release_date: z.string().optional().default(''),
 });
 
-const GenreSchema = z.object({
+export const GenreSchema = z.object({
   id: z.number(),
   name: z.string(),
 });
 
-const CastSchema = z.object({
+export const CastSchema = z.object({
   id: z.number(),
   name: z.string(),
   character: z.string(),
@@ -23,7 +23,7 @@ const CastSchema = z.object({
   order: z.number(),
 });
 
-const CrewSchema = z.object({
+export const CrewSchema = z.object({
   id: z.number(),
   name: z.string(),
   job: z.string(),
@@ -31,7 +31,7 @@ const CrewSchema = z.object({
   profile_path: z.string().nullable(),
 });
 
-const VideoSchema = z.object({
+export const VideoSchema = z.object({
   id: z.string(),
   key: z.string(),
   name: z.string(),
@@ -40,7 +40,15 @@ const VideoSchema = z.object({
   official: z.boolean(),
 });
 
-const MovieDetailsSchema = MovieSchema.extend({
+
+export const TmdbResponseSchema = z.object({
+  results: z.array(MovieSchema).default([]),
+  page: z.number().default(1),
+  total_pages: z.number().default(1),
+  total_results: z.number().default(0),
+});
+
+export const MovieDetailsSchema = MovieSchema.extend({
   genres: z.array(GenreSchema).default([]),
   runtime: z.number().nullable().default(0),
   budget: z.number().default(0),
@@ -54,13 +62,6 @@ const MovieDetailsSchema = MovieSchema.extend({
   videos: z.object({
     results: z.array(VideoSchema).default([]),
   }).default({ results: [] }),
-});
-
-const TmdbResponseSchema = z.object({
-  results: z.array(MovieSchema).default([]),
-  page: z.number().default(1),
-  total_pages: z.number().default(1),
-  total_results: z.number().default(0),
 });
 
 export type Movie = z.infer<typeof MovieSchema>;
@@ -77,6 +78,13 @@ const TMDB_CONFIG = {
 } as const;
 
 type Params = Record<string, string | number>;
+
+interface NextRequestOptions extends RequestInit {
+  next?: {
+    revalidate?: number | false;
+    tags?: string[];
+  };
+}
 
 const isServer = () => typeof window === 'undefined';
 
@@ -118,9 +126,9 @@ const fetchAndValidate = async <T extends z.ZodTypeAny>(
 export const TmdbService = {
   async fetch<T extends z.ZodTypeAny>(
     schema: T,
-    endpoint: string, 
-    params: Params = {}, 
-    options: RequestInit = {}
+    endpoint: string,
+    params: Params = {},
+    options: NextRequestOptions = {}
   ): Promise<z.infer<T>> {
     const isServerSide = isServer() && TMDB_CONFIG.accessToken;
     const url = isServerSide
@@ -135,7 +143,7 @@ export const TmdbService = {
             Authorization: `Bearer ${TMDB_CONFIG.accessToken}`,
             ...options.headers,
           },
-          next: { revalidate: 3600, ...(options as any).next },
+          next: { revalidate: 3600, ...(options.next ?? {}) },
         }
       : options;
 
@@ -189,10 +197,6 @@ export const TmdbService = {
     } catch (e) {
        if (e instanceof Error && e.message === 'Data validation failed') {
         console.error(`Validation Error for movie details ${movieId}`);
-        // For details page, we might want to throw to trigger the error boundary
-        // or return a partial safe object if possible. 
-        // Given constraints, throwing ensures the UI shows the "Something went wrong" error page
-        // instead of a broken partial page.
         throw e;
       }
       throw e;

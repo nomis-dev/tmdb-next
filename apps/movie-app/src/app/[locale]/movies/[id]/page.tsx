@@ -12,7 +12,7 @@ export default async function MovieDetailPage({
 }) {
   const { locale, id } = await params;
   const t = await getTranslations({ locale, namespace: 'MovieDetail' });
-  
+
   const movieId = parseInt(id, 10);
 
   if (isNaN(movieId)) {
@@ -105,7 +105,7 @@ export default async function MovieDetailPage({
               <span className="text-slate-400">•</span>
               <span className="text-slate-300">{new Date(movie.release_date).getFullYear()}</span>
               <span className="text-slate-400">•</span>
-              <span className="text-slate-300">{formatRuntime(movie.runtime)}</span>
+              <span className="text-slate-300">{movie.runtime ? formatRuntime(movie.runtime) : ''}</span>
             </div>
 
             <MovieDetailActions
