@@ -1,65 +1,75 @@
-export interface Movie {
-  id: number;
-  title: string;
-  overview: string;
-  poster_path: string;
-  backdrop_path: string;
-  vote_average: number;
-  release_date: string;
-}
+import { z } from 'zod';
 
-export interface Genre {
-  id: number;
-  name: string;
-}
+const MovieSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  overview: z.string(),
+  poster_path: z.string().nullable().transform((val) => val ?? ''),
+  backdrop_path: z.string().nullable().transform((val) => val ?? ''),
+  vote_average: z.number(),
+  release_date: z.string().optional().default(''),
+});
 
-export interface Cast {
-  id: number;
-  name: string;
-  character: string;
-  profile_path: string | null;
-  order: number;
-}
+const GenreSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+});
 
-export interface Crew {
-  id: number;
-  name: string;
-  job: string;
-  department: string;
-  profile_path: string | null;
-}
+const CastSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  character: z.string(),
+  profile_path: z.string().nullable(),
+  order: z.number(),
+});
 
-export interface Video {
-  id: string;
-  key: string;
-  name: string;
-  site: string;
-  type: string;
-  official: boolean;
-}
+const CrewSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  job: z.string(),
+  department: z.string(),
+  profile_path: z.string().nullable(),
+});
 
-export interface MovieDetails extends Movie {
-  genres: Genre[];
-  runtime: number;
-  budget: number;
-  revenue: number;
-  status: string;
-  tagline: string;
-  credits: {
-    cast: Cast[];
-    crew: Crew[];
-  };
-  videos: {
-    results: Video[];
-  };
-}
+const VideoSchema = z.object({
+  id: z.string(),
+  key: z.string(),
+  name: z.string(),
+  site: z.string(),
+  type: z.string(),
+  official: z.boolean(),
+});
 
-interface TmdbResponse<T> {
-  results: T[];
-  page: number;
-  total_pages: number;
-  total_results: number;
-}
+const MovieDetailsSchema = MovieSchema.extend({
+  genres: z.array(GenreSchema).default([]),
+  runtime: z.number().nullable().default(0),
+  budget: z.number().default(0),
+  revenue: z.number().default(0),
+  status: z.string().default(''),
+  tagline: z.string().default(''),
+  credits: z.object({
+    cast: z.array(CastSchema).default([]),
+    crew: z.array(CrewSchema).default([]),
+  }).default({ cast: [], crew: [] }),
+  videos: z.object({
+    results: z.array(VideoSchema).default([]),
+  }).default({ results: [] }),
+});
+
+const TmdbResponseSchema = z.object({
+  results: z.array(MovieSchema).default([]),
+  page: z.number().default(1),
+  total_pages: z.number().default(1),
+  total_results: z.number().default(0),
+});
+
+export type Movie = z.infer<typeof MovieSchema>;
+export type Genre = z.infer<typeof GenreSchema>;
+export type Cast = z.infer<typeof CastSchema>;
+export type Crew = z.infer<typeof CrewSchema>;
+export type Video = z.infer<typeof VideoSchema>;
+export type MovieDetails = z.infer<typeof MovieDetailsSchema>;
+export type TmdbResponse = z.infer<typeof TmdbResponseSchema>;
 
 const TMDB_CONFIG = {
   baseUrl: 'https://api.themoviedb.org/3',
@@ -77,64 +87,95 @@ const buildUrl = (base: string, endpoint: string, params: Params = {}) => {
   return query ? `${base}/${endpoint}?${query}` : `${base}/${endpoint}`;
 };
 
-const fetchJson = async <T>(url: string, options?: RequestInit): Promise<T> => {
+const fetchAndValidate = async <T extends z.ZodTypeAny>(
+  schema: T,
+  url: string,
+  options?: RequestInit
+): Promise<z.infer<T>> => {
   try {
     const res = await fetch(url, options);
     if (!res.ok) throw new Error(`API Error: ${res.status} ${res.statusText}`);
-    return res.json();
-  } catch (error) {
-    // Re-throw AbortError to handle request cancellation correctly
-    if (error instanceof Error && error.name === 'AbortError') throw error;
     
+    const rawData = await res.json();
+    
+    const result = schema.safeParse(rawData);
+
+    if (!result.success) {
+      console.error(`[Data Corruption Detected] API Response from ${url} did not match schema:`, result.error.format());
+      
+      throw new Error('Data validation failed');
+    }
+
+    return result.data;
+
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') throw error;
     console.error(`Fetch failed for ${url}:`, error);
-    throw new Error(`Failed to fetch data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw error;
   }
 };
 
 export const TmdbService = {
-  async fetch<T>(endpoint: string, params: Params = {}, options: RequestInit = {}): Promise<T> {
-    if (isServer() && TMDB_CONFIG.accessToken) {
-      return fetchJson<T>(
-        buildUrl(TMDB_CONFIG.baseUrl, endpoint, params),
-        {
+  async fetch<T extends z.ZodTypeAny>(
+    schema: T,
+    endpoint: string, 
+    params: Params = {}, 
+    options: RequestInit = {}
+  ): Promise<z.infer<T>> {
+    const isServerSide = isServer() && TMDB_CONFIG.accessToken;
+    const url = isServerSide
+      ? buildUrl(TMDB_CONFIG.baseUrl, endpoint, params)
+      : buildUrl('/api/movies', endpoint, params); // Proxied on client
+
+    const fetchOptions = isServerSide
+      ? {
           ...options,
           headers: {
             accept: 'application/json',
             Authorization: `Bearer ${TMDB_CONFIG.accessToken}`,
             ...options.headers,
           },
-          next: { revalidate: 3600, ...options.next },
+          next: { revalidate: 3600, ...(options as any).next },
         }
-      );
-    }
+      : options;
 
-    return fetchJson<T>(buildUrl('/api/movies', endpoint, params), options);
+    return fetchAndValidate(schema, url, fetchOptions);
   },
 
   async getPopularMovies(locale = 'en-US', page = 1): Promise<Movie[]> {
-    const data = await this.fetch<TmdbResponse<Movie>>('movie/popular', {
-      language: locale,
-      page,
-    }, {
-      next: { revalidate: 3600 },
-      cache: 'force-cache',
-    });
-    return data.results;
+    try {
+      const data = await this.fetch(TmdbResponseSchema, 'movie/popular', {
+        language: locale,
+        page,
+      }, {
+        next: { revalidate: 3600 },
+        cache: 'force-cache',
+      });
+      return data.results;
+    } catch (e) {
+      console.error('Failed to get popular movies, returning empty list as fallback adapter', e);
+      return [];
+    }
   },
 
   async searchMovies(query: string, locale = 'en-US', page = 1, signal?: AbortSignal): Promise<Movie[]> {
     if (!query.trim()) return [];
     
-    const data = await this.fetch<TmdbResponse<Movie>>('search/movie', {
-      query: query.trim(),
-      language: locale,
-      page,
-    }, { signal });
-    return data.results;
+    try {
+      const data = await this.fetch(TmdbResponseSchema, 'search/movie', {
+        query: query.trim(),
+        language: locale,
+        page,
+      }, { signal });
+      return data.results;
+    } catch (e) {
+      console.error('Failed to search movies, returning empty list fallback', e);
+      return [];
+    }
   },
 
   async getMovieDetails(movieId: number, locale = 'en-US'): Promise<MovieDetails> {
-    return this.fetch<MovieDetails>(`movie/${movieId}`, {
+    return this.fetch(MovieDetailsSchema, `movie/${movieId}`, {
       language: locale,
       append_to_response: 'credits,videos,images',
     });
