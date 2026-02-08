@@ -34,7 +34,7 @@ function MovieCard({
       <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 bg-secondary/20">
         <Link 
           href={`/movie/${id}`} 
-          className="block w-full h-full"
+          className="block w-full h-full relative"
           prefetch={true}
         >
           {posterPath ? (
@@ -59,8 +59,6 @@ function MovieCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </Link>
 
-        {/* 评分徽章 - 这里的 Link 可能覆盖了它，所以需要 pointer-events-none 或者更高的 z-index */}
-        {/* 由于位于 Link 之后，且是 absolute，如果有 z-index 应该会覆盖 Link */}
         <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 flex items-center gap-1 z-10 pointer-events-none">
           <svg
             xmlns="http://www.w3.org/2000/svg"

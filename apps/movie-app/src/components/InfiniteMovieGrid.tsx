@@ -173,6 +173,11 @@ export default function InfiniteMovieGrid({
               const isLoaderRow = virtualRow.index > virtualRows.length - 1;
               const moviesInRow = virtualRows[virtualRow.index];
 
+              const isVisible = 
+                virtualRow.index < 2 || 
+                (virtualRow.start >= (virtualizer.scrollOffset || 0) - 100 && 
+                 virtualRow.start < (virtualizer.scrollOffset || 0) + (typeof window !== 'undefined' ? window.innerHeight : 1000));
+
               return (
                 <div
                   key={virtualRow.index}
@@ -195,7 +200,7 @@ export default function InfiniteMovieGrid({
                         title={movie.title}
                         posterPath={movie.poster_path}
                         rating={Number((movie.vote_average || 0).toFixed(1))}
-                        priority={virtualRow.index === 0}
+                        priority={isVisible}
                         isFavorite={favorites.some((f) => f.movieId === movie.id)}
                       />
                     ))
