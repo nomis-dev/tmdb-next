@@ -1,101 +1,85 @@
-# Tmdb
+# TMDB Next
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+本项目是一个使用 Nx 管理的 Monorepo 工作空间，包含一个基于 TMDB API 的 Next.js 电影应用。
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## 在线演示
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/next?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+[https://tmdb-next.huandoy.dpdns.org/zh/movies](https://tmdb-next.huandoy.dpdns.org/zh/movies)
 
-## Run tasks
+## 项目结构
 
-To run the dev server for your app, use:
+本 Nx 工作空间包含以下项目：
 
-```sh
-npx nx dev movie-app
+- **apps/movie-app**: 一个 Next.js 15 应用程序。这是主要的电影浏览应用。
+- **libs/ui**: 一个共享的 UI 库，包含可重用的组件（例如：骨架屏 Skeleton、加载动画 Spinner）。
+
+## 关于 Movie App
+
+**Movie App** 是一个现代化的响应式 Web 应用，允许用户浏览、搜索和发现电影。
+
+主要功能：
+
+- **发现电影**: 浏览热门和流行电影。
+- **搜索**: 按标题搜索电影。
+- **电影详情**: 查看详细信息，包括演员阵容、预告片、导演等。
+- **收藏夹**: 将电影添加到个人收藏列表（需要登录）。
+- **国际化 (i18n)**: 支持多语言切换（英语、中文）。
+- **无限滚动**: 流畅的无限滚动浏览体验。
+- **响应式设计 (RWD)**: 完美适配移动端、平板和桌面端。
+
+## 技术栈
+
+- **框架**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Monorepo 工具**: [Nx](https://nx.dev/)
+- **样式**: [Tailwind CSS](https://tailwindcss.com/)
+- **数据获取**: [TanStack Query](https://tanstack.com/query/latest) (React Query)
+- **API**: [The Movie Database (TMDB) API](https://www.themoviedb.org/documentation/api)
+- **认证**: [Supabase Auth](https://supabase.com/auth)
+- **数据库**: [Supabase](https://supabase.com/database) (PostgreSQL)
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
+- **国际化**: [next-intl](https://next-intl-docs.vercel.app/)
+- **部署**: [Cloudflare Pages](https://pages.cloudflare.com/) (使用 `@opennextjs/cloudflare`)
+
+## 快速开始
+
+1.  **克隆仓库:**
+
+    ```bash
+    git clone <repository-url>
+    cd tmdb-next
+    ```
+
+2.  **安装依赖:**
+
+    ```bash
+    npm install
+    # 或者
+    yarn install
+    # 或者
+    pnpm install
+    ```
+
+3.  **设置环境变量:**
+
+    复制 `.env.local.example` 到 `.env.local` 并填入必要的 API 密钥（TMDB, Supabase 等）。
+
+4.  **运行开发服务器:**
+
+    ```bash
+    npx nx run @tmdb/movie-app:dev
+    ```
+
+    打开浏览器访问 [http://localhost:3000](http://localhost:3000) 查看结果。
+
+## 部署
+
+本项目部署在 Cloudflare Pages 上。
+
+如需手动构建和部署：
+
+```bash
+cd apps/movie-app
+npm run deploy
 ```
 
-To create a production bundle:
-
-```sh
-npx nx build movie-app
-```
-
-To see all available targets to run for a project, run:
-
-```sh
-npx nx show project movie-app
-```
-
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/next:app demo
-```
-
-To generate a new library, use:
-
-```sh
-npx nx g @nx/react:lib mylib
-```
-
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
-
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Set up CI!
-
-### Step 1
-
-To connect to Nx Cloud, run the following command:
-
-```sh
-npx nx connect
-```
-
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/next?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+(注意: `deploy` 脚本使用 `@opennextjs/cloudflare` 处理构建流程，并通过 `wrangler` 进行部署。)
