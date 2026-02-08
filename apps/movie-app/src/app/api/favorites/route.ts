@@ -1,10 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { db } from '@/db';
-import { favorites } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
 
-// GET /api/favorites - Get all favorites for current user
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -14,10 +10,23 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userFavorites = await db
-      .select()
-      .from(favorites)
-      .where(eq(favorites.userId, user.id));
+    const { data: userFavorites, error } = await supabase
+      .from('favorites')
+      .select(`
+        id,
+        userId:user_id,
+        movieId:movie_id,
+        mediaType:media_type,
+        title,
+        posterPath:poster_path,
+        rating,
+        createdAt:created_at
+      `)
+      .eq('user_id', user.id);
+
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json(userFavorites);
   } catch (error) {
@@ -26,8 +35,7 @@ export async function GET() {
   }
 }
 
-// POST /api/favorites - Add a movie to favorites
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -44,26 +52,40 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if already favorited
-    const existing = await db
-      .select()
-      .from(favorites)
-      .where(and(eq(favorites.userId, user.id), eq(favorites.movieId, movieId)));
+    const { data: existing } = await supabase
+      .from('favorites')
+      .select('id')
+      .match({ user_id: user.id, movie_id: movieId });
 
-    if (existing.length > 0) {
+    if (existing && existing.length > 0) {
       return NextResponse.json({ error: 'Already in favorites' }, { status: 409 });
     }
 
-    const [newFavorite] = await db
-      .insert(favorites)
-      .values({
-        userId: user.id,
-        movieId,
-        mediaType,
+    const { data: newFavorite, error } = await supabase
+      .from('favorites')
+      .insert({
+        user_id: user.id,
+        movie_id: movieId,
+        media_type: mediaType,
         title,
-        posterPath,
+        poster_path: posterPath,
         rating,
       })
-      .returning();
+      .select(`
+        id,
+        userId:user_id,
+        movieId:movie_id,
+        mediaType:media_type,
+        title,
+        posterPath:poster_path,
+        rating,
+        createdAt:created_at
+      `)
+      .single();
+
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json(newFavorite, { status: 201 });
   } catch (error) {
@@ -72,8 +94,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE /api/favorites - Remove a movie from favorites
-export async function DELETE(request: NextRequest) {
+export async function DELETE(request: Request) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -89,9 +110,14 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'movieId is required' }, { status: 400 });
     }
 
-    await db
-      .delete(favorites)
-      .where(and(eq(favorites.userId, user.id), eq(favorites.movieId, parseInt(movieId))));
+    const { error } = await supabase
+      .from('favorites')
+      .delete()
+      .match({ user_id: user.id, movie_id: parseInt(movieId) });
+
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
