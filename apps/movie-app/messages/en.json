@@ -40,5 +40,10 @@
     "yourPassword": "Your password",
     "passwordError": "Password must be at least 6 characters",
     "loading": "Loading..."
+  },
+  "ErrorPage": {
+    "title": "Something went wrong!",
+    "message": "We couldn't load the data for this page. Please try again later.",
+    "reload": "Reload Page"
   }
 }

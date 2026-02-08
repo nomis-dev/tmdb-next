@@ -153,8 +153,11 @@ export const TmdbService = {
       });
       return data.results;
     } catch (e) {
-      console.error('Failed to get popular movies, returning empty list as fallback adapter', e);
-      return [];
+      if (e instanceof Error && e.message === 'Data validation failed') {
+        console.error('Validation Error for popular movies, fallback to empty');
+        return [];
+      }
+      throw e;
     }
   },
 
@@ -169,15 +172,30 @@ export const TmdbService = {
       }, { signal });
       return data.results;
     } catch (e) {
-      console.error('Failed to search movies, returning empty list fallback', e);
-      return [];
+      if (e instanceof Error && e.message === 'Data validation failed') {
+        console.error('Validation Error for search movies, fallback to empty');
+        return [];
+      }
+      throw e;
     }
   },
 
   async getMovieDetails(movieId: number, locale = 'en-US'): Promise<MovieDetails> {
-    return this.fetch(MovieDetailsSchema, `movie/${movieId}`, {
-      language: locale,
-      append_to_response: 'credits,videos,images',
-    });
+    try {
+      return await this.fetch(MovieDetailsSchema, `movie/${movieId}`, {
+        language: locale,
+        append_to_response: 'credits,videos,images',
+      });
+    } catch (e) {
+       if (e instanceof Error && e.message === 'Data validation failed') {
+        console.error(`Validation Error for movie details ${movieId}`);
+        // For details page, we might want to throw to trigger the error boundary
+        // or return a partial safe object if possible. 
+        // Given constraints, throwing ensures the UI shows the "Something went wrong" error page
+        // instead of a broken partial page.
+        throw e;
+      }
+      throw e;
+    }
   },
 };

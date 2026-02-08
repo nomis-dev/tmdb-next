@@ -40,5 +40,10 @@
     "yourPassword": "您的密码",
     "passwordError": "密码必须至少包含6个字符",
     "loading": "加载中..."
+  },
+  "ErrorPage": {
+    "title": "出错了！",
+    "message": "无法加载此页面的数据。请稍后再试。",
+    "reload": "重新加载页面"
   }
 }
