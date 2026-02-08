@@ -149,6 +149,12 @@ export default function InfiniteMovieGrid({
         </div>
       )}
 
+      {isLoading && searchQuery && (
+         <div className="flex justify-center py-20">
+           <LoadingSpinner size="md" />
+         </div>
+      )}
+
       {!isLoading && allMovies.length > 0 && (
         <>
           <div
