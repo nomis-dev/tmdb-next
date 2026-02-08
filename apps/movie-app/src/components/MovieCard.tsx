@@ -32,8 +32,8 @@ function MovieCard({
   return (
     <div className="block group mb-8">
       <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 bg-secondary/20">
-        <Link 
-          href={`/movie/${id}`} 
+        <Link
+          href={`/movies/${id}`}
           className="block w-full h-full relative"
           prefetch={true}
         >
@@ -86,8 +86,8 @@ function MovieCard({
       </div>
 
       <div className="space-y-1">
-        <Link 
-          href={`/movie/${id}`} 
+        <Link
+          href={`/movies/${id}`}
           className="font-semibold text-white group-hover:text-accent transition-colors duration-200 truncate block"
           prefetch={true}
         >

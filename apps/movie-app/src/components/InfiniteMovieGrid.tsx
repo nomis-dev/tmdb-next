@@ -27,7 +27,7 @@ export default function InfiniteMovieGrid({
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
   const { user } = useAuth();
-  
+
   const initialQueryRef = useRef(searchQuery);
 
   const { data: favorites = [] } = useQuery<Favorite[]>({
@@ -39,7 +39,7 @@ export default function InfiniteMovieGrid({
       return res.json();
     },
     enabled: !!user,
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5,
   });
 
   const updateColumnsFromCSS = useCallback(() => {
@@ -67,7 +67,7 @@ export default function InfiniteMovieGrid({
 
   useEffect(() => {
     if (!sessionStorage.getItem('tmdb_scroll_pos')) {
-       window.scrollTo({ top: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [searchQuery]);
 
@@ -129,12 +129,6 @@ export default function InfiniteMovieGrid({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20 md:mt-16">
-      {isLoading && (
-        <div className="flex items-center justify-center py-20">
-          <LoadingSpinner />
-        </div>
-      )}
-
       {!isLoading && searchQuery && allMovies.length === 0 && (
         <div className="text-center py-20">
           <svg
@@ -173,10 +167,10 @@ export default function InfiniteMovieGrid({
               const isLoaderRow = virtualRow.index > virtualRows.length - 1;
               const moviesInRow = virtualRows[virtualRow.index];
 
-              const isVisible = 
-                virtualRow.index < 2 || 
-                (virtualRow.start >= (virtualizer.scrollOffset || 0) - 100 && 
-                 virtualRow.start < (virtualizer.scrollOffset || 0) + (typeof window !== 'undefined' ? window.innerHeight : 1000));
+              const isVisible =
+                virtualRow.index < 2 ||
+                (virtualRow.start >= (virtualizer.scrollOffset || 0) - 100 &&
+                  virtualRow.start < (virtualizer.scrollOffset || 0) + (typeof window !== 'undefined' ? window.innerHeight : 1000));
 
               return (
                 <div
