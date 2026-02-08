@@ -9,7 +9,7 @@ import NextLoader from '@/components/NextLoader';
 import NavBar from '@/components/NavBar';
 
 export const metadata = {
-  title: 'TMDB Movie App',
+  title: 'TMDB Next',
   description: 'TMDB Movie App',
 };
 
