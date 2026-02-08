@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { Link } from '@/i18n/routing';
+import BackButton from '@/components/BackButton';
 import { TmdbService } from '@/services/tmdb-service';
 import MovieImage from '@/components/MovieImage';
 import MovieDetailActions from '@/components/MovieDetailActions';
@@ -61,25 +61,7 @@ export default async function MovieDetailPage({
       </div>
 
       <div className="relative z-20 -mt-96 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 group"
-        >
-          <svg
-            className="w-5 h-5 group-hover:-translate-x-1 transition-transform"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 19l-7-7m0 0l7-7m-7 7h18"
-            />
-          </svg>
-          <span>{t('backToMovies')}</span>
-        </Link>
+        <BackButton />
 
         <div className="flex flex-col md:flex-row gap-8">
           <div className="flex-shrink-0">

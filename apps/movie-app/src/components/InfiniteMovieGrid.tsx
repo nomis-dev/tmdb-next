@@ -64,22 +64,6 @@ export default function InfiniteMovieGrid({
     return () => resizeObserver.disconnect();
   }, [updateColumnsFromCSS]);
 
-  useEffect(() => {
-    const savedPos = sessionStorage.getItem('tmdb_scroll_pos');
-    if (savedPos) {
-      setTimeout(() => {
-        const scrollPos = parseInt(savedPos);
-        // Ensure we don't scroll beyond the actual document height
-        const maxScroll = Math.max(
-          0,
-          document.documentElement.scrollHeight - window.innerHeight
-        );
-        const targetScroll = Math.min(scrollPos, maxScroll);
-        window.scrollTo({ top: targetScroll, behavior: 'instant' });
-        sessionStorage.removeItem('tmdb_scroll_pos');
-      }, 100);
-    }
-  }, []);
 
   useEffect(() => {
     if (!sessionStorage.getItem('tmdb_scroll_pos')) {

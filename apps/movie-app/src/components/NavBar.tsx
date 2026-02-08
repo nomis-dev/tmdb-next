@@ -18,7 +18,7 @@ export default function NavBar() {
         <div className="hidden md:flex h-16 items-center justify-between gap-4">
           <div className="flex-shrink-0 flex items-center gap-2">
             <Link
-              href="/"
+              href="/movies"
               className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-accent to-purple-500"
             >
               TMDB Next

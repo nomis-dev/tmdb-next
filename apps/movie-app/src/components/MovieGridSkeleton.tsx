@@ -1,6 +1,6 @@
 import { Skeleton } from '@tmdb/ui';
 
-export default function Loading() {
+export default function MovieGridSkeleton() {
   const skeletonCards = Array.from({ length: 20 }, (_, i) => i);
 
   return (

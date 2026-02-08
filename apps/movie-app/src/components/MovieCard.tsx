@@ -25,46 +25,43 @@ function MovieCard({
 }: MovieCardProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const handleClick = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('tmdb_scroll_pos', window.scrollY.toString());
-    }
-  }, []);
-
   const handleImageLoad = useCallback(() => {
     setIsLoaded(true);
   }, []);
 
   return (
-    <Link 
-      href={`/movie/${id}`} 
-      className="block group mb-8" 
-      prefetch={true}
-      onClick={handleClick}
-    >
+    <div className="block group mb-8">
       <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 bg-secondary/20">
-        {posterPath ? (
-          <>
-            <MovieImage
-              src={posterPath}
-              alt={title}
-              fill
-              className={`group-hover:scale-110`}
-              sizes="(max-width: 768px) 33vw, 20vw"
-              priority={priority}
-              onLoad={handleImageLoad}
-            />
-            {!isLoaded && (
-              <Skeleton className="absolute inset-0 h-full w-full rounded-xl" />
-            )}
-          </>
-        ) : (
-          <Skeleton className="absolute inset-0 h-full w-full rounded-xl" />
-        )}
+        <Link 
+          href={`/movie/${id}`} 
+          className="block w-full h-full"
+          prefetch={true}
+        >
+          {posterPath ? (
+            <>
+              <MovieImage
+                src={posterPath}
+                alt={title}
+                fill
+                className={`group-hover:scale-110`}
+                sizes="(max-width: 768px) 33vw, 20vw"
+                priority={priority}
+                onLoad={handleImageLoad}
+              />
+              {!isLoaded && (
+                <Skeleton className="absolute inset-0 h-full w-full rounded-xl" />
+              )}
+            </>
+          ) : (
+            <Skeleton className="absolute inset-0 h-full w-full rounded-xl" />
+          )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </Link>
 
-        <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 flex items-center gap-1 z-10">
+        {/* 评分徽章 - 这里的 Link 可能覆盖了它，所以需要 pointer-events-none 或者更高的 z-index */}
+        {/* 由于位于 Link 之后，且是 absolute，如果有 z-index 应该会覆盖 Link */}
+        <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 flex items-center gap-1 z-10 pointer-events-none">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -91,11 +88,15 @@ function MovieCard({
       </div>
 
       <div className="space-y-1">
-        <h3 className="font-semibold text-white group-hover:text-accent transition-colors duration-200 truncate">
+        <Link 
+          href={`/movie/${id}`} 
+          className="font-semibold text-white group-hover:text-accent transition-colors duration-200 truncate block"
+          prefetch={true}
+        >
           {title}
-        </h3>
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 }
 
