@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/components/AuthProvider';
 import MovieCard from '@/components/MovieCard';
-import { LoadingSpinner } from '@tmdb/ui';
+import MovieGridSkeleton from '@/components/MovieGridSkeleton';
 import { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { ArrowDown, ArrowUp } from 'lucide-react';
@@ -50,11 +50,7 @@ export default function FavoritesPage() {
   });
 
   if (authLoading || (queryLoading && user)) {
-    return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
+    return <MovieGridSkeleton />;
   }
 
   if (!user) {
@@ -70,10 +66,10 @@ export default function FavoritesPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20 md:mt-16">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <h1 className="text-3xl font-bold text-white">My Favorites</h1>
-        
+
         <div className="flex items-center gap-3">
           <span className="text-sm text-slate-400 mr-1">Sort by:</span>
-          
+
           <button
             onClick={() => {
               if (sortBy.startsWith('date')) {
@@ -82,11 +78,10 @@ export default function FavoritesPage() {
                 setSortBy('date_desc');
               }
             }}
-            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 border ${
-              sortBy.startsWith('date')
-                ? 'bg-white text-black border-white'
-                : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'
-            }`}
+            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 border ${sortBy.startsWith('date')
+              ? 'bg-white text-black border-white'
+              : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'
+              }`}
           >
             Date
             {sortBy.startsWith('date') && (
@@ -102,11 +97,10 @@ export default function FavoritesPage() {
                 setSortBy('rating_desc');
               }
             }}
-            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 border ${
-              sortBy.startsWith('rating')
-                ? 'bg-white text-black border-white'
-                : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'
-            }`}
+            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 border ${sortBy.startsWith('rating')
+              ? 'bg-white text-black border-white'
+              : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'
+              }`}
           >
             Rating
             {sortBy.startsWith('rating') && (
@@ -133,7 +127,7 @@ export default function FavoritesPage() {
           </svg>
           <h3 className="text-xl font-semibold text-white mb-2">No favorites yet</h3>
           <p className="text-slate-400 mb-6">Start exploring movies and add them to your list!</p>
-          <Link 
+          <Link
             href="/"
             className="inline-block px-6 py-2 rounded-full bg-accent hover:bg-accent/90 text-white font-medium transition-colors"
           >
