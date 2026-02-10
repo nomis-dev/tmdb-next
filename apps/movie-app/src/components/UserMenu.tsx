@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from './AuthProvider';
 import { Link } from '@/i18n/routing';
 import { Heart } from 'lucide-react';
@@ -38,6 +38,12 @@ export default function UserMenu() {
     setShowLoginModal(false);
     resetForm();
   };
+
+  useEffect(() => {
+    if (user) {
+      closeModal();
+    }
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
