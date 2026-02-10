@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useParams, usePathname, useRouter } from 'next/navigation';
 import { useDebounce } from '@/hooks/useDebounce';
 
+import { useIsFetching } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 export default function SearchInput() {
@@ -19,6 +20,8 @@ export default function SearchInput() {
   const debouncedQuery = useDebounce(query, 300);
 
   const lastExecutedQuery = useRef<string | null>(null);
+  
+  const isFetching = useIsFetching({ queryKey: ['movies', 'search'] });
 
   useEffect(() => {
     const isMoviesPage = pathname?.endsWith('/movies');
@@ -53,7 +56,7 @@ export default function SearchInput() {
     }
   }, [searchParams]);
 
-  const isPending = query !== debouncedQuery;
+  const isPending = query !== debouncedQuery || isFetching > 0;
 
   return (
     <div className="relative group w-full">

@@ -45,5 +45,16 @@
     "title": "出错了！",
     "message": "无法加载此页面的数据。请稍后再试。",
     "reload": "重新加载页面"
+  },
+  "FavoritesPage": {
+    "title": "我的收藏",
+    "sortBy": "排序方式：",
+    "sortDate": "日期",
+    "sortRating": "评分",
+    "pleaseSignIn": "请登录以查看收藏",
+    "accessList": "登录后即可访问您的精选电影列表。",
+    "noFavorites": "暂无收藏",
+    "startExploring": "开始探索电影并将其添加到您的列表！",
+    "exploreMovies": "探索电影"
   }
 }

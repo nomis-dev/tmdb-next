@@ -5,10 +5,11 @@ import { usePathname } from 'next/navigation';
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isHomePage = pathname === '/' || pathname === '/zh' || pathname === '/en';
+  const isHomePage = pathname === '/' || pathname === '/zh' || pathname === '/en' || pathname?.endsWith('/movies');
 
   return (
     <motion.div
+      key={pathname}
       initial={{ x: isHomePage ? 20 : -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ ease: 'easeOut', duration: 0.3 }}

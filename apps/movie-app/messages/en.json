@@ -45,5 +45,16 @@
     "title": "Something went wrong!",
     "message": "We couldn't load the data for this page. Please try again later.",
     "reload": "Reload Page"
+  },
+  "FavoritesPage": {
+    "title": "My Favorites",
+    "sortBy": "Sort by:",
+    "sortDate": "Date",
+    "sortRating": "Rating",
+    "pleaseSignIn": "Please sign in to view favorites",
+    "accessList": "Access your curated list of movies by logging in.",
+    "noFavorites": "No favorites yet",
+    "startExploring": "Start exploring movies and add them to your list!",
+    "exploreMovies": "Explore Movies"
   }
 }
