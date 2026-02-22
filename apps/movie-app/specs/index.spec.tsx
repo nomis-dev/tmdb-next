@@ -1,10 +1,13 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import Page from '../src/app/page';
+import Page from '../src/app/[locale]/page';
+
+jest.mock('next/navigation', () => ({
+  redirect: jest.fn(),
+}));
 
 describe('Page', () => {
-  it('should render successfully', () => {
-    const { baseElement } = render(<Page />);
-    expect(baseElement).toBeTruthy();
+  it('should render successfully', async () => {
+    const params = Promise.resolve({ locale: 'en' });
+    const result = await Page({ params });
+    expect(result).toBeUndefined();
   });
 });
