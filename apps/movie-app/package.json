@@ -3,30 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "next build",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && wrangler deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
-  },
-  "dependencies": {
-    "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.95.3",
-    "@tanstack/react-query": "^5.90.20",
-    "@tanstack/react-virtual": "^3.13.18",
-    "drizzle-orm": "^0.45.1",
-    "framer-motion": "^12.33.0",
-    "next": "15.5.10",
-    "next-intl": "^4.8.2",
-    "nextjs-toploader": "^3.9.17",
-    "postgres": "^3.4.8",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-intersection-observer": "^10.0.2",
-    "tailwindcss-animate": "^1.0.7",
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "dotenv": "^17.2.4",
-    "drizzle-kit": "^0.31.8"
   }
 }

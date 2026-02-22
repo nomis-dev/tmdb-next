@@ -24,6 +24,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@tmdb/ui": [
+        "../../libs/ui/src/index.ts"
       ]
     },
     "types": [
@@ -31,7 +34,6 @@
       "node"
     ],
     "outDir": "dist",
-    "rootDir": "src",
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
   },
   "include": [
