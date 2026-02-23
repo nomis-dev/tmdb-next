@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useCallback, memo, useOptimistic, startTransition } from 'react';
 import { useAuth } from './AuthProvider';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -27,13 +27,12 @@ function FavoriteButton({
 }: FavoriteButtonProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [optimisticFavorite, setOptimisticFavorite] = useState(isFavorite);
+  const [optimisticFavorite, addOptimisticFavorite] = useOptimistic<boolean, boolean>(
+    isFavorite,
+    (state, newFavorite) => newFavorite
+  );
 
-  useEffect(() => {
-    setOptimisticFavorite(isFavorite);
-  }, [isFavorite]);
-
-  const { mutate: toggleFavorite, isPending } = useMutation({
+  const { mutateAsync: toggleFavoriteAsync, isPending } = useMutation({
     mutationFn: async () => {
       if (!user) return;
       if (isFavorite) {
@@ -67,7 +66,6 @@ function FavoriteButton({
     },
     onError: (err, newTodo, context) => {
       if (!user) return;
-      setOptimisticFavorite(isFavorite);
       
       if (context?.previousFavorites) {
         queryClient.setQueryData(['favorites', user.id], context.previousFavorites);
@@ -83,9 +81,15 @@ function FavoriteButton({
   const handleClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setOptimisticFavorite(!optimisticFavorite); // Instant UI update
-    toggleFavorite();
-  }, [optimisticFavorite, toggleFavorite]);
+    startTransition(async () => {
+      addOptimisticFavorite(!isFavorite); // Instant UI update using React 19
+      try {
+        await toggleFavoriteAsync();
+      } catch {
+        // Error will be caught and handled by react-query's onError
+      }
+    });
+  }, [isFavorite, addOptimisticFavorite, toggleFavoriteAsync]);
 
   if (!user) {
     return null;
