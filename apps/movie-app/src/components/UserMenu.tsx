@@ -16,6 +16,8 @@ import {
 
 type AuthMode = 'login' | 'register' | 'magic-link' | 'check-email';
 
+// UserMenu component handles user authentication UI including login, register, 
+// magic link, and displaying the user profile dropdown when authenticated.
 export default function UserMenu() {
   const { user, loading, signUp, signIn, signInWithMagicLink, signOut } = useAuth();
   const t = useTranslations('UserMenu');
@@ -26,6 +28,7 @@ export default function UserMenu() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Reset all auth form fields and return to the default 'login' state
   const resetForm = () => {
     setMode('login');
     setEmail('');
@@ -34,17 +37,21 @@ export default function UserMenu() {
     setSubmitting(false);
   };
 
+  // Close the authentication modal and clear the form data
   const closeModal = () => {
     setShowLoginModal(false);
     resetForm();
   };
 
+  // Automatically close the modal when a user successfully logs in
   useEffect(() => {
     if (user) {
       closeModal();
     }
   }, [user]);
 
+  // Handle form submission and execute the appropriate Auth flow
+  // based on whether the user is logging in, registering, or using a magic link
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
@@ -87,12 +94,14 @@ export default function UserMenu() {
     setSubmitting(false);
   };
 
+  // Render a loading skeleton while checking the user's initial auth state
   if (loading) {
     return (
       <div className="w-8 h-8 rounded-full bg-slate-700 animate-pulse" />
     );
   }
 
+  // If the user is authenticated, render the user avatar and dropdown menu
   if (user) {
     return (
       <DropdownMenu modal={false}>
@@ -136,6 +145,7 @@ export default function UserMenu() {
     );
   }
 
+  // Render the unauthenticated state: 'Sign In' button and the auth modal
   return (
     <>
       <button
