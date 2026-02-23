@@ -1,5 +1,13 @@
 import { z } from 'zod';
 
+// ==========================================
+// 1. Zod Schemas for Runtime Type Validation
+// ==========================================
+// These schemas ensure that the JSON payload received from the TMDB API
+// perfectly matches our TypeScript types. If TMDB changes their API
+// or returns corrupted data, Zod will catch it instantly rather than
+// causing silent UI crashes down the line.
+
 export const MovieSchema = z.object({
   id: z.number(),
   title: z.string(),
@@ -72,6 +80,10 @@ export type Video = z.infer<typeof VideoSchema>;
 export type MovieDetails = z.infer<typeof MovieDetailsSchema>;
 export type TmdbResponse = z.infer<typeof TmdbResponseSchema>;
 
+// ==========================================
+// 2. Global TMDB Configuration
+// ==========================================
+
 const TMDB_CONFIG = {
   baseUrl: 'https://api.themoviedb.org/3',
   accessToken: process.env.TMDB_ACCESS_TOKEN,
@@ -79,6 +91,7 @@ const TMDB_CONFIG = {
 
 type Params = Record<string, string | number>;
 
+// Helper definition for Next.js specific fetch options (like caching)
 interface NextRequestOptions extends RequestInit {
   next?: {
     revalidate?: number | false;
@@ -86,7 +99,12 @@ interface NextRequestOptions extends RequestInit {
   };
 }
 
+// Utility to check if code is running on the Server (Node.js/Edge) or Client (Browser)
 const isServer = () => typeof window === 'undefined';
+
+// ==========================================
+// 3. Core Fetch & Validation Engine
+// ==========================================
 
 const buildUrl = (base: string, endpoint: string, params: Params = {}) => {
   const query = new URLSearchParams(
@@ -95,6 +113,7 @@ const buildUrl = (base: string, endpoint: string, params: Params = {}) => {
   return query ? `${base}/${endpoint}?${query}` : `${base}/${endpoint}`;
 };
 
+// A robust fetch wrapper that guarantees type safety using Zod
 const fetchAndValidate = async <T extends z.ZodTypeAny>(
   schema: T,
   url: string,
@@ -123,13 +142,21 @@ const fetchAndValidate = async <T extends z.ZodTypeAny>(
   }
 };
 
+// ==========================================
+// 4. Exposed Service APIs
+// ==========================================
 export const TmdbService = {
+  // Isomorphic (Dual-Environment) Fetcher
   async fetch<T extends z.ZodTypeAny>(
     schema: T,
     endpoint: string,
     params: Params = {},
     options: NextRequestOptions = {}
   ): Promise<z.infer<T>> {
+    // CRITICAL LOGIC: 
+    // If we are on the Server, we securely inject the API Key and call TMDB directly.
+    // If we are on the Client (Browser), we MUST NOT leak the API key. Instead, we
+    // proxy the request through our own Next.js API route (`/api/movies`).
     const isServerSide = isServer() && TMDB_CONFIG.accessToken;
     const url = isServerSide
       ? buildUrl(TMDB_CONFIG.baseUrl, endpoint, params)
@@ -150,12 +177,15 @@ export const TmdbService = {
     return fetchAndValidate(schema, url, fetchOptions);
   },
 
+  // Fetches a list of popular movies with built-in Next.js caching
   async getPopularMovies(locale = 'en-US', page = 1): Promise<Movie[]> {
     try {
       const data = await this.fetch(TmdbResponseSchema, 'movie/popular', {
         language: locale,
         page,
       }, {
+        // Next.js App Router Cache: Cache the response for 1 hour (3600 seconds)
+        // This dramatically reduces API hits to TMDB and speeds up page loads
         next: { revalidate: 3600 },
         cache: 'force-cache',
       });

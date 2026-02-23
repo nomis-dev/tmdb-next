@@ -17,6 +17,13 @@ interface Favorite {
   movieId: number;
 }
 
+// ==========================================
+// OPTIMISTIC FAVORITE BUTTON (React 19 + TanStack Query)
+// ==========================================
+// This component renders the heart icon on movie cards.
+// It uses cutting-edge React 19 features to provide a "zero-latency" feel.
+// When a user clicks the button, the UI updates instantly, while the actual
+// database request happens silently in the background.
 function FavoriteButton({
   movieId,
   title,
@@ -27,12 +34,19 @@ function FavoriteButton({
 }: FavoriteButtonProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  
+  // 1. React 19 `useOptimistic` Hook
+  // This allows us to temporarily override the true `isFavorite` state from the server
+  // with an "optimistic" localized state while a network request is pending.
+  // If the component re-renders from the server data, `optimisticFavorite` resets to `isFavorite`.
   const [optimisticFavorite, addOptimisticFavorite] = useOptimistic<boolean, boolean>(
     isFavorite,
     (state, newFavorite) => newFavorite
   );
 
+  // 2. The Network Mutation (TanStack Query)
   const { mutateAsync: toggleFavoriteAsync, isPending } = useMutation({
+    // The actual API call to add or remove the favorite in Supabase
     mutationFn: async () => {
       if (!user) return;
       if (isFavorite) {
@@ -45,48 +59,65 @@ function FavoriteButton({
         });
       }
     },
+    // Fired BEFORE the mutationFn runs
     onMutate: async () => {
       if (!user) return;
+      
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update magically)
       await queryClient.cancelQueries({ queryKey: ['favorites', user.id] });
 
+      // Snapshot the previous value of the user's favorites list from the cache
       const previousFavorites = queryClient.getQueryData<Favorite[]>(['favorites', user.id]);
 
+      // Optimistically update the GLOBAL cache. 
+      // This is crucial because it ensures any OTHER component looking at the favorites
+      // cache also sees this instant update.
       if (previousFavorites) {
         queryClient.setQueryData<Favorite[]>(['favorites', user.id], (old) => {
           if (!old) return [];
           if (isFavorite) {
-            return old.filter((f) => f.movieId !== movieId);
+            return old.filter((f) => f.movieId !== movieId); // Remove
           } else {
-            return [...old, { movieId }];
+            return [...old, { movieId }]; // Add
           }
         });
       }
 
+      // Return the snapshot so we have it in case the network request fails
       return { previousFavorites };
     },
+    // Fired if the API request failed (e.g., user went offline)
     onError: (err, newTodo, context) => {
       if (!user) return;
       
+      // Oh no, the request failed! Roll back the global cache to the snapshot we saved.
       if (context?.previousFavorites) {
         queryClient.setQueryData(['favorites', user.id], context.previousFavorites);
       }
       console.error('Failed to toggle favorite:', err);
     },
+    // Fired after either success OR error
     onSettled: () => {
       if (!user) return;
+      // Force a background refetch from the database to guarantee total sync
       queryClient.invalidateQueries({ queryKey: ['favorites', user.id] });
     },
   });
 
+  // 3. The Click Handler
   const handleClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
+    e.stopPropagation(); // Prevent the click from navigating to the movie details page
+    
+    // React 19 `startTransition` marks this state update as a non-blocking UI transition
     startTransition(async () => {
-      addOptimisticFavorite(!isFavorite); // Instant UI update using React 19
+      // INSTANTLY flip the heart icon red/white before the network even knows!
+      addOptimisticFavorite(!isFavorite); 
       try {
+        // Now quietly fire off the heavy network request in the background
         await toggleFavoriteAsync();
       } catch {
-        // Error will be caught and handled by react-query's onError
+        // Error will be caught and rolled-back by react-query's onError
       }
     });
   }, [isFavorite, addOptimisticFavorite, toggleFavoriteAsync]);

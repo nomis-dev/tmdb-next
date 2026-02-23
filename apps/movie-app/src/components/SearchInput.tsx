@@ -7,6 +7,8 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useIsFetching } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
+// A global Search Input component that synchronizes local text state
+// with the URL query parameters ?q=... in a highly optimized way.
 export default function SearchInput() {
   const t = useTranslations('NavBar');
   const searchParams = useSearchParams();
@@ -16,16 +18,26 @@ export default function SearchInput() {
   const locale = params.locale;
 
   const initialQuery = searchParams.get('q') || '';
+  // 1. Local input state vs Debounced state
+  // `query` updates instantly as the user types (for responsive UI rendering).
   const [query, setQuery] = useState(initialQuery);
+  // `debouncedQuery` only updates after the user stops typing for 300ms.
+  // This prevents sending 10 useless API requests if the user types quickly.
   const debouncedQuery = useDebounce(query, 300);
 
+  // Tracks the last query that was successfully pushed to the URL
+  // to prevent infinite render loops between URL changes and local state changes.
   const lastExecutedQuery = useRef<string | null>(null);
   
+  // React Query hook to check if any 'movies search' request is currently in flight
   const isFetching = useIsFetching({ queryKey: ['movies', 'search'] });
 
+  // 2. The core logic: Synchronize the Debounced Query with the Browser URL
   useEffect(() => {
+    // Check if we are already on the search results page (/movies)
     const isMoviesPage = pathname?.endsWith('/movies');
 
+    // Skip if we've already processed this exact search term
     if (debouncedQuery === lastExecutedQuery.current) {
       return;
     }
@@ -34,13 +46,19 @@ export default function SearchInput() {
       const newUrl = `/${locale}/movies?q=${encodeURIComponent(debouncedQuery)}`;
       
       if (isMoviesPage) {
+        // Optimization: If we are already on /movies, we use `history.replaceState`
+        // instead of `router.push`. This updates the URL without adding a new entry
+        // to the browser's back button history history for every single letter typed.
         window.history.replaceState(null, '', newUrl);
         lastExecutedQuery.current = debouncedQuery;
       } else {
+        // If we are on the Home page or Profile page, we must `router.push`
+        // the user to the /movies page so they can see the search results.
         lastExecutedQuery.current = debouncedQuery;
         router.push(newUrl);
       }
     } else if (lastExecutedQuery.current) {
+      // User cleared the search box. Remove the ?q=... param from the URL
       if (isMoviesPage) {
         window.history.replaceState(null, '', `/${locale}/movies`);
       }
@@ -49,6 +67,8 @@ export default function SearchInput() {
     }
   }, [debouncedQuery, locale, pathname, router]);
 
+  // 3. Keep local state in sync if the URL changes externally 
+  // (e.g., user clicks the browser's Back/Forward button)
   useEffect(() => {
     const currentParam = searchParams.get('q') || '';
     if (currentParam && lastExecutedQuery.current === null) {
@@ -56,6 +76,9 @@ export default function SearchInput() {
     }
   }, [searchParams]);
 
+  // 4. Loading indicator state:
+  // It is 'loading' if either the user is still typing (waiting for debounce payload),
+  // OR the network request to TMDB is still hanging.
   const isPending = query !== debouncedQuery || isFetching > 0;
 
   return (

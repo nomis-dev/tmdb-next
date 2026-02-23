@@ -18,10 +18,19 @@ interface Favorite {
   movieId: number;
 }
 
+// -----------------------------------------------------------------------------
+// INFINITE VIRTUALIZED MOVIE GRID
+// -----------------------------------------------------------------------------
+// This component is the workhorse of the /movies page. It handles:
+// 1. Fetching movies infinitely as the user scrolls down (useInfiniteQuery).
+// 2. Rendering only the movies currently visible on screen to save memory (useWindowVirtualizer).
+// 3. Ensuring seamless SEO and instantaneous first-load by accepting `initialMovies` from the server.
 export default function InfiniteMovieGrid({
   initialMovies,
   locale,
 }: InfiniteMovieGridProps) {
+  // 1. Grid Math State: We need to know how many columns are currently rendered
+  // so we can chunk our 1D movie array into 2D rows for the virtualizer.
   const gridRef = useRef<HTMLDivElement>(null);
   const [columns, setColumns] = useState(2);
   const searchParams = useSearchParams();
@@ -42,6 +51,9 @@ export default function InfiniteMovieGrid({
     staleTime: 1000 * 60 * 5,
   });
 
+  // 2. Responsive Grid Calculation:
+  // We use CSS Grid (grid-cols-2 md:grid-cols-3 etc.) to handle responsiveness.
+  // This function reads the actual computed CSS to tell React how many columns exist currently.
   const updateColumnsFromCSS = useCallback(() => {
     if (gridRef.current) {
       const gridStyles = getComputedStyle(gridRef.current);
@@ -65,14 +77,19 @@ export default function InfiniteMovieGrid({
   }, [updateColumnsFromCSS]);
 
 
+  // 3. Scroll Restoration:
+  // If the user lands on a new search, forcefully reset scroll to top.
   useEffect(() => {
     if (!sessionStorage.getItem('tmdb_scroll_pos')) {
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [searchQuery]);
 
+  // If the current search query matches what the page originally loaded with,
+  // we can use the `initialMovies` passed from the Server Component (Zero Loading Screen!).
   const shouldUseInitialData = searchQuery === initialQueryRef.current;
 
+  // 4. Infinite Data Fetching logic via React Query
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
       queryKey: ['movies', searchQuery ? 'search' : 'popular', locale, searchQuery],
@@ -92,20 +109,28 @@ export default function InfiniteMovieGrid({
       } : undefined,
     });
 
+  // Flatten the React Query pages (array of arrays) into a single 1D array of movies
   const allMovies = data ? data.pages.flat() : [];
 
+  // 5. Virtualization Prep: Chunk the 1D array into rows based on current column count
   const virtualRows: Movie[][] = [];
   for (let i = 0; i < allMovies.length; i += columns) {
     virtualRows.push(allMovies.slice(i, i + columns));
   }
 
+  // 6. Window Virtualizer Setup
+  // It only renders items in the precise pixel range of the window's current scroll position.
   const virtualizer = useWindowVirtualizer({
+    // Add +1 fake row at the end if there is more data to load (to trigger fetchNextPage)
     count: hasNextPage ? virtualRows.length + 1 : virtualRows.length,
-    estimateSize: () => 350,
-    overscan: 5,
+    estimateSize: () => 350, // rough height of a movie card
+    overscan: 5, // render 5 rows above and below the fold to prevent flickering
     measureElement: (element) => element?.getBoundingClientRect().height,
   });
 
+  // 7. Infinite Scroll Intersection Observer Replacement
+  // Instead of IntersectionObserver, we check if the last rendered virtual item
+  // is close to the bottom of the data set. If yes, fetch the next page!
   useEffect(() => {
     const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
 
@@ -157,6 +182,12 @@ export default function InfiniteMovieGrid({
 
       {!isLoading && allMovies.length > 0 && (
         <>
+          {/* 
+            8. The "Invisible Ghost Grid": 
+            We render a hidden div utilizing Tailwind CSS grid classes. 
+            Why? Because the resizeObserver uses THIS invisible element to calculate 
+            how many `columns` we should have at the current screen size. 
+          */}
           <div
             ref={gridRef}
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 invisible absolute"
@@ -165,6 +196,7 @@ export default function InfiniteMovieGrid({
             <div />
           </div>
 
+          {/* 9. The Actual Virtualized Container */}
           <div
             className="relative w-full"
             style={{ height: `${virtualizer.getTotalSize()}px` }}
@@ -173,6 +205,10 @@ export default function InfiniteMovieGrid({
               const isLoaderRow = virtualRow.index > virtualRows.length - 1;
               const moviesInRow = virtualRows[virtualRow.index];
 
+              // Determine if the movie is currently visible on screen (or very close to it)
+              // We pass this boolean to <MovieCard priority={isVisible} />.
+              // If true, Next/Image will load the image immediately. 
+              // If false, Next/Image will natively lazy-load the image, saving tons of bandwidth.
               const isVisible =
                 virtualRow.index < 2 ||
                 (virtualRow.start >= (virtualizer.scrollOffset || 0) - 100 &&
@@ -183,6 +219,7 @@ export default function InfiniteMovieGrid({
                   key={virtualRow.index}
                   data-index={virtualRow.index}
                   ref={virtualizer.measureElement}
+                  // We manually position each row absolutely using the top `start` coordinate calculated by the virtualizer
                   className="absolute top-0 left-0 w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
                   style={{ transform: `translateY(${virtualRow.start}px)` }}
                 >
